@@ -1,19 +1,16 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb" }
-    },
-    {
-      "src": "build_files.sh",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "staticfiles" }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python manage.py collectstatic --noinput",
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60
     }
-  ],
-  "routes": [
-    { "src": "/static/(.*)", "dest": "/staticfiles/$1" },
-    { "src": "/(.*)", "dest": "api/index.py" }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.py"
+    }
   ]
 }
+
