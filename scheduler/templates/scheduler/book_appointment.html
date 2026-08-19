@@ -1,0 +1,58 @@
+{% extends "scheduler/base.html" %}
+{% block title %}Book Repair Appointment — AutoFix{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">📅 Schedule Repair or Maintenance</h2>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div style="background: rgba(239,68,68,0.15); border: 1px solid var(--danger); padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; color: var(--danger);">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.vehicle.id_for_label }}">Select Vehicle</label>
+                {{ form.vehicle }}
+                {% if not form.vehicle.field.queryset.exists %}
+                    <p style="font-size: 0.82rem; color: var(--warn); margin-top: 0.4rem;">
+                        ⚠️ You have no registered vehicles. <a href="{% url 'add_vehicle' %}" style="text-decoration: underline;">Click here to add a vehicle first</a>.
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.service.id_for_label }}">Select Service</label>
+                {{ form.service }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="{{ form.scheduled_date.id_for_label }}">Preferred Date</label>
+                    {{ form.scheduled_date }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.scheduled_time.id_for_label }}">Preferred Time</label>
+                    {{ form.scheduled_time }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.notes.id_for_label }}">Notes or Symptoms (Optional)</label>
+                {{ form.notes }}
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn" style="flex: 1;">Confirm Booking Slot</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

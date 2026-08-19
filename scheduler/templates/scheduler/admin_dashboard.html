@@ -1,0 +1,186 @@
+{% extends "scheduler/base.html" %}
+{% block title %}Shop Admin Dashboard — AutoFix Repair Hub{% endblock %}
+
+{% block content %}
+<div class="card" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, var(--bg-card) 100%);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--orange-primary); font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem;">ADMINISTRATIVE CONTROL CENTER</div>
+            <h1 style="font-size: 2.2rem; margin: 0;">AutoFix Shop Management Portal</h1>
+        </div>
+        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+            <a class="btn" href="{% url 'add_service' %}">+ Add Service Type</a>
+            <a class="btn btn-secondary" href="/admin/" target="_blank">Django Admin Panel ↗</a>
+        </div>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Total Revenue Paid</div>
+            <div class="metric-value" style="color: var(--ok);">${{ total_revenue }}</div>
+        </div>
+        <div class="metric-icon">💰</div>
+    </div>
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Pending Invoices</div>
+            <div class="metric-value" style="color: var(--warn);">${{ pending_revenue }}</div>
+        </div>
+        <div class="metric-icon">⏳</div>
+    </div>
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Pending Assignments</div>
+            <div class="metric-value" style="color: var(--orange-primary);">{{ pending|length }}</div>
+        </div>
+        <div class="metric-icon">⚡</div>
+    </div>
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Completed Jobs</div>
+            <div class="metric-value" style="color: var(--accent-blue);">{{ completed_count }}</div>
+        </div>
+        <div class="metric-icon">🏆</div>
+    </div>
+</div>
+
+<!-- Pending Appointments Section -->
+<div class="card" style="border-left: 4px solid var(--orange-primary);">
+    <div class="card-header">
+        <h2 class="card-title">⚠️ Pending Customer Bookings (Require Technician Assignment)</h2>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Requested Date & Time</th>
+                    <th>Customer Name</th>
+                    <th>Vehicle Info</th>
+                    <th>Requested Service</th>
+                    <th>Customer Notes</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in pending %}
+                <tr>
+                    <td style="font-family: 'JetBrains Mono', monospace; color: var(--accent-blue); font-size: 0.85rem;">
+                        {{ a.scheduled_date }} at {{ a.scheduled_time|time:"H:i" }}
+                    </td>
+                    <td style="font-weight: 600;">
+                        {{ a.customer.user.get_full_name|default:a.customer.user.username }}<br>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">📞 {{ a.customer.user.phone_number|default:"N/A" }}</span>
+                    </td>
+                    <td>
+                        {{ a.vehicle.year }} {{ a.vehicle.make }} {{ a.vehicle.model }}<br>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--orange-primary);">{{ a.vehicle.plate_number }}</span>
+                    </td>
+                    <td style="font-weight: 600;">{{ a.service.name }} (${{ a.service.base_price }})</td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted); max-width: 200px;">{{ a.notes|default:"None" }}</td>
+                    <td>
+                        <a class="btn btn-sm" href="{% url 'assign_mechanic' a.pk %}">👨‍🔧 Assign Mechanic &rarr;</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 1.5rem;">
+                        All customer bookings are assigned! 🎉
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Active & Scheduled Jobs Section -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">🚘 Active & Scheduled Shop Jobs</h2>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Customer & Vehicle</th>
+                    <th>Service</th>
+                    <th>Assigned Technician</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in upcoming %}
+                <tr>
+                    <td style="font-family: 'JetBrains Mono', monospace; color: var(--accent-blue); font-size: 0.85rem;">
+                        {{ a.scheduled_date }} at {{ a.scheduled_time|time:"H:i" }}
+                    </td>
+                    <td>
+                        <strong style="color: var(--text-main);">{{ a.customer.user.get_full_name|default:a.customer.user.username }}</strong><br>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">{{ a.vehicle.year }} {{ a.vehicle.make }} {{ a.vehicle.model }} ({{ a.vehicle.plate_number }})</span>
+                    </td>
+                    <td>{{ a.service.name }}</td>
+                    <td>
+                        {% if a.mechanic %}
+                            👨‍🔧 {{ a.mechanic.user.get_full_name|default:a.mechanic.user.username }} ({{ a.mechanic.specialty }})
+                        {% else %}
+                            <span style="color: var(--warn);">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="status-pill status-{{ a.status }}">{{ a.get_status_display }}</span></td>
+                    <td>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <a class="btn btn-sm btn-secondary" href="{% url 'assign_mechanic' a.pk %}">Reassign</a>
+                            <a class="btn btn-sm btn-secondary" href="{% url 'invoice_detail' a.pk %}">Invoice</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 1.5rem;">
+                        No active jobs scheduled right now.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Service Menu Management Section -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">🛠️ Shop Repair Services Catalog</h2>
+        <a class="btn btn-sm" href="{% url 'add_service' %}">+ Add New Service</a>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Service Name</th>
+                    <th>Description</th>
+                    <th>Est. Bay Time</th>
+                    <th>Base Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in services %}
+                <tr>
+                    <td style="font-weight: 600;">{{ s.name }}</td>
+                    <td style="color: var(--text-muted);">{{ s.description }}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace;">{{ s.estimated_duration }} min</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--ok);">${{ s.base_price }}</td>
+                    <td>
+                        <a class="btn btn-sm btn-secondary" href="{% url 'edit_service' s.pk %}">Edit Service</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

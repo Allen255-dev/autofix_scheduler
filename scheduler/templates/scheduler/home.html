@@ -1,0 +1,156 @@
+{% extends "scheduler/base.html" %}
+{% block title %}AutoFix Repair Shop — Professional Auto Repair & Scheduling{% endblock %}
+
+{% block extra_head %}
+<style>
+.hero {
+    background: linear-gradient(135deg, rgba(249,115,22,0.13) 0%, rgba(15,23,42,0.6) 100%), var(--bg-card);
+    border: 1px solid var(--border-hi);
+    border-radius: 16px;
+    padding: 3.5rem 2.5rem;
+    margin-bottom: 1.6rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.hero-glow {
+    position:absolute; top:-60px; right:-60px;
+    width:260px; height:260px;
+    background:var(--orange-g); filter:blur(70px);
+    border-radius:50%; pointer-events:none;
+}
+.hero-glow2 {
+    position:absolute; bottom:-40px; left:30%;
+    width:180px; height:180px;
+    background:rgba(56,189,248,0.05); filter:blur(60px);
+    border-radius:50%; pointer-events:none;
+}
+.hero-inner { max-width:700px; position:relative; z-index:2; }
+.hero-badge {
+    font-family:'JetBrains Mono',monospace; color:var(--orange);
+    font-size:0.78rem; font-weight:700; letter-spacing:0.1em;
+    text-transform:uppercase; margin-bottom:0.9rem;
+    display:flex; align-items:center; gap:0.5rem;
+}
+.live-dot {
+    width:8px; height:8px; background:var(--ok); border-radius:50%;
+    box-shadow:0 0 0 0 rgba(16,185,129,0.6);
+    animation:pulse 2s infinite;
+}
+@keyframes pulse {
+    0%{box-shadow:0 0 0 0 rgba(16,185,129,0.6)}
+    70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}
+    100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}
+}
+.hero h1 {
+    font-size:clamp(2rem,5vw,3.2rem);
+    line-height:1.08; margin-bottom:1.1rem;
+    background:linear-gradient(160deg,#FFFFFF 0%,#CBD5E1 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+.hero p { color:var(--muted); font-size:1.05rem; line-height:1.65; margin-bottom:2rem; max-width:560px; }
+.hero-actions { display:flex; gap:0.9rem; flex-wrap:wrap; }
+.service-card {
+    display:flex; flex-direction:column;
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:12px; padding:1.25rem;
+    transition:all 0.25s; gap:0.5rem;
+}
+.service-card:hover { border-color:var(--border-hi); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+.service-name { font-weight:600; font-size:0.95rem; color:var(--text); }
+.service-desc { font-size:0.82rem; color:var(--muted); line-height:1.5; flex:1; }
+.service-meta { display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; flex-wrap:wrap; gap:0.5rem; }
+.service-price { font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--ok); font-size:1.05rem; }
+.service-time  { font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--blue); background:rgba(56,189,248,0.1); padding:0.2rem 0.5rem; border-radius:4px; }
+.services-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+@media(max-width:600px){
+    .hero{padding:2rem 1.25rem;}
+    .services-grid{grid-template-columns:1fr;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span class="live-dot"></span>
+            BAY SCHEDULER ACTIVE &bull; SLOTS AVAILABLE NOW
+        </div>
+        <h1>Fast, Reliable Automotive Service &amp; Repair</h1>
+        <p>Skip the phone queue. Book your repair slot online, track your technician's diagnostic notes in real-time, and receive itemised invoices instantly.</p>
+        <div class="hero-actions">
+            {% if not user.is_authenticated %}
+                <a class="btn" href="{% url 'signup' %}" style="padding:0.85rem 1.8rem;font-size:0.97rem;">Book Your Service →</a>
+                <a class="btn btn-secondary" href="{% url 'login' %}" style="padding:0.85rem 1.6rem;font-size:0.97rem;">Sign In</a>
+            {% else %}
+                <a class="btn" href="{% url 'book_appointment' %}" style="padding:0.85rem 1.8rem;font-size:0.97rem;">Schedule Repair Slot →</a>
+                <a class="btn btn-secondary" href="{% url 'dashboard' %}" style="padding:0.85rem 1.6rem;">My Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div><div class="metric-label">Service Bays</div><div class="metric-value text-orange">3</div></div>
+        <div class="metric-icon">🚗</div>
+    </div>
+    <div class="metric-card">
+        <div><div class="metric-label">Technicians</div><div class="metric-value text-blue">ASE ✓</div></div>
+        <div class="metric-icon">👨‍🔧</div>
+    </div>
+    <div class="metric-card">
+        <div><div class="metric-label">Turnaround</div><div class="metric-value text-ok">Same Day</div></div>
+        <div class="metric-icon">⏱️</div>
+    </div>
+    <div class="metric-card">
+        <div><div class="metric-label">Digital Reports</div><div class="metric-value text-purple">Live</div></div>
+        <div class="metric-icon">📋</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">🔧 Available Repair Services</h2>
+        {% if user.role == 'admin' %}
+            <a class="btn btn-sm" href="{% url 'add_service' %}">+ Add Service</a>
+        {% endif %}
+    </div>
+
+    {% if services %}
+    <div class="services-grid">
+        {% for s in services %}
+        <div class="service-card">
+            <div class="service-name">{{ s.name }}</div>
+            <div class="service-desc">{{ s.description|default:"Professional repair service." }}</div>
+            <div class="service-meta">
+                <span class="service-price">${{ s.base_price }}</span>
+                <span class="service-time">⏱ {{ s.estimated_duration }} min</span>
+            </div>
+            <div style="margin-top:0.6rem;">
+                {% if user.is_authenticated and user.role == 'customer' %}
+                    <a class="btn btn-sm btn-full" href="{% url 'book_appointment' %}">Book This Service</a>
+                {% elif user.role == 'admin' %}
+                    <a class="btn btn-sm btn-secondary btn-full" href="{% url 'edit_service' s.pk %}">Edit Service</a>
+                {% else %}
+                    <a class="btn btn-sm btn-full" href="{% url 'login' %}">Sign In to Book</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:3rem 1rem;color:var(--dim);">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem;">🔧</div>
+        <p>No services configured yet.</p>
+        {% if user.role == 'admin' %}
+            <a class="btn btn-sm" href="{% url 'add_service' %}" style="margin-top:1rem;">Add First Service</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

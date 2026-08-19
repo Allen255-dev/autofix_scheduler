@@ -1,0 +1,112 @@
+{% extends "scheduler/base.html" %}
+{% block title %}Technician Workbench — AutoFix Repair Shop{% endblock %}
+
+{% block content %}
+<div class="card" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, var(--bg-card) 100%);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent-purple); font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem;">TECHNICIAN WORKBENCH</div>
+            <h1 style="font-size: 2.2rem; margin: 0;">Welcome, Technician {{ user.get_full_name|default:user.username }}</h1>
+            <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 0.3rem;">
+                Specialty: <strong>{{ profile.specialty|default:"General Automotive Technician" }}</strong> &bull; Status: <span style="color: var(--ok); font-weight: 700;">Active Duty</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Assigned Jobs</div>
+            <div class="metric-value" style="color: var(--accent-purple);">{{ appointments|length }}</div>
+        </div>
+        <div class="metric-icon">🧰</div>
+    </div>
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Completed Repairs</div>
+            <div class="metric-value" style="color: var(--ok);">{{ completed_jobs_count }}</div>
+        </div>
+        <div class="metric-icon">✅</div>
+    </div>
+    <div class="metric-card">
+        <div>
+            <div class="metric-label">Shop Bay Assignment</div>
+            <div class="metric-value" style="color: var(--orange-primary);">Bay 1 & 2</div>
+        </div>
+        <div class="metric-icon">🏭</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">🔧 Active Assigned Repair Work Orders</h2>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Scheduled Time</th>
+                    <th>Customer & Vehicle</th>
+                    <th>Service Type</th>
+                    <th>Customer Notes</th>
+                    <th>Current Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in appointments %}
+                <tr>
+                    <td style="font-family: 'JetBrains Mono', monospace; color: var(--accent-blue); font-size: 0.85rem;">
+                        {{ a.scheduled_date }}<br>
+                        <strong>{{ a.scheduled_time|time:"H:i" }}</strong>
+                    </td>
+                    <td>
+                        <strong style="color: var(--text-main);">{{ a.vehicle.year }} {{ a.vehicle.make }} {{ a.vehicle.model }}</strong><br>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--orange-primary);">Plate: {{ a.vehicle.plate_number }}</span><br>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Cust: {{ a.customer.user.get_full_name|default:a.customer.user.username }} ({{ a.customer.user.phone_number|default:"No phone" }})</span>
+                    </td>
+                    <td style="font-weight: 600;">
+                        {{ a.service.name }}
+                        <div style="font-size: 0.78rem; font-weight: normal; color: var(--text-muted);">Est. duration: {{ a.service.estimated_duration }}m</div>
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted); max-width: 220px;">
+                        {{ a.notes|default:"No notes provided." }}
+                    </td>
+                    <td><span class="status-pill status-{{ a.status }}">{{ a.get_status_display }}</span></td>
+                    <td>
+                        <div style="display: flex; gap: 0.4rem; flex-direction: column;">
+                            {% if a.status != 'completed' and a.status != 'cancelled' %}
+                                <div style="display: flex; gap: 0.4rem;">
+                                    {% if a.status != 'in_progress' %}
+                                        <form method="post" action="{% url 'update_job_status' a.pk %}" style="display:inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="status" value="in_progress">
+                                            <button class="btn btn-sm btn-secondary" type="submit">▶️ Start Repair</button>
+                                        </form>
+                                    {% endif %}
+                                    <form method="post" action="{% url 'update_job_status' a.pk %}" style="display:inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="completed">
+                                        <button class="btn btn-sm" type="submit">✅ Mark Complete</button>
+                                    </form>
+                                </div>
+                                <a class="btn btn-sm btn-secondary" href="{% url 'log_diagnosis' a.pk %}">📝 Log Diagnostics & Parts</a>
+                            {% else %}
+                                <a class="btn btn-sm btn-secondary" href="{% url 'invoice_detail' a.pk %}">📄 View Final Invoice</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                        No assigned repair jobs currently. New bookings assigned by Admin will appear here.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

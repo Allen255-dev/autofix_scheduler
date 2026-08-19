@@ -1,0 +1,48 @@
+{% extends "scheduler/base.html" %}
+{% block title %}Register Vehicle — AutoFix{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">🚘 Register Vehicle to Garage</h2>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="{{ form.make.id_for_label }}">Vehicle Make</label>
+                    {{ form.make }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.model.id_for_label }}">Vehicle Model</label>
+                    {{ form.model }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="{{ form.year.id_for_label }}">Year</label>
+                    {{ form.year }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.plate_number.id_for_label }}">License Plate Number</label>
+                    {{ form.plate_number }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.vin.id_for_label }}">VIN (Vehicle Identification Number - Optional)</label>
+                {{ form.vin }}
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn" style="flex: 1;">Save Vehicle</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

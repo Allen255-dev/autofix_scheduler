@@ -1,0 +1,40 @@
+{% extends "scheduler/base.html" %}
+{% block title %}Assign Mechanic — AutoFix{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">👨‍🔧 Assign Technician to Repair Job</h2>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem;">
+            <div style="font-size: 0.9rem; line-height: 1.6;">
+                <div><strong>Requested Date & Time:</strong> {{ appointment.scheduled_date }} at {{ appointment.scheduled_time|time:"H:i" }}</div>
+                <div><strong>Service Requested:</strong> {{ appointment.service.name }}</div>
+                <div><strong>Customer & Vehicle:</strong> {{ appointment.customer.user.get_full_name|default:appointment.customer.user.username }} — {{ appointment.vehicle }}</div>
+                <div><strong>Customer Notes:</strong> {{ appointment.notes|default:"None" }}</div>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.mechanic.id_for_label }}">Select Technician</label>
+                {{ form.mechanic }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Update Status</label>
+                {{ form.status }}
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn" style="flex: 1;">Assign & Confirm Job</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
